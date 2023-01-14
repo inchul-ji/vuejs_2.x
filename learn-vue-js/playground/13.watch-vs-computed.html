@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          num: 10,
+        },
+        computed: {
+          // 용도: 단순한 값 계산, validation
+          // 캐싱, 튜닝 등이 잘되어 있어 computed 를 watch 보다 많이 활용한다.
+          doubleNum: function () {
+            // data 의 num 을 기준으로 동작한다.
+            return this.num * 2;
+          },
+        },
+        watch: {
+          // 용도: 무거운 로직, 매번 실행되기 부담스러운 로직
+          num: function (newValue, oldValue) {
+            // newValue: 갱신된 값을 받는다.
+            // oldValue: 갱신 이전의 값을 받는다.
+
+            // data 의 num 을 기준으로 동작한다.
+            this.fetchUserByNumber(newValue);
+          },
+        },
+        methods: {
+          fetchUserByNumber: function (num) {
+            console.log(num);
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
