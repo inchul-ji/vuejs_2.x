@@ -1,0 +1,401 @@
+Flux란?
+- MVC 패턴의 복잡한 데이터 흐름 문제를 해결하는 개발 패턴
+  (Unidirectional data flow)
+
+1. action: 화면에서 발생하는 이벤트 또는 사용자의 입력
+2. dispatcher: 데이터를 변경하는 방법, 메서드 (model 을 변경하기 위한 동작)
+3. model: 화면에 표시할 데이터
+4. view: 사용자에게 비춰지는 화면
+
+[ Flux 패턴의 단방향 데이터 흐름 ]
+Action --> Dispatcher --> Store --> View ( --> Action .... 단반향 반복)
+
+
+[ Vuex 컨셉 ]
+- State: 컴포넌트 간에 공유하는 데이터 data()
+- View: 데이터를 표시하는 화면 template
+- Action: 사용자의 입력에 따라 데이터를 변경하는 methods
+
+** 단방향 데이터 흐름 처리를 단순하게 도식화한 그림 **
+Action --> State --> View (--> Action.... 단방향 반복)
+
+[Vuex 구조]
+컴포넌트 --> 비동기 로직 --> 동기 로직 --> 상태
+
+** vuex구조.png 참조 **
+
+[ getters 란? ]
+- state 값을 접근하는 속성이자 computed() 처럼 미리 연산된 값을 접근하는 방식
+------------------------------------------------------
+// store.js
+state: {
+  num: 10
+},
+getters: {
+  getNumber(state) {
+    return state.num;
+  },
+  doubleNumber(state) {
+    return state.num * 2;
+  }
+}
+
+<p>{{ this.$store.getters.getNumber}}</p>
+<p>{{ this.$store.getters.doubleNumber}}</p>
+------------------------------------------------------
+
+[ mutations 란? ]
+- state 의 값을 변경할 수 있는 유일한 방법이자 메서드
+- 뮤테이션은 commit() 으로 동작 시킨다.
+
+------------------------------------------------------
+// store.js
+state: { num : 10},
+mutations: {
+  printNumbers(state) {
+    return state.num;
+  },
+  sumNumbers(state, anotherNum) {
+    return state.num + antherNum;
+  }
+}
+
+// App.vue ( commit : mutations 를 동작 시키는 명령어 )
+this.$store.commit('printNumbers')
+this.$store.commit('sumNumbers', 20)
+------------------------------------------------------
+
+[ mutations 의 commit() 형식 ]
+- state 를 변경하기 위해 mutations를 동작시킬 때 인자(payload)를 전다 할 수 있음
+
+------------------------------------------------------
+// store.js
+state: { storeNum: 10 },
+mutations: {
+  modifyState(state, payload) {
+    console.log(payload.str);
+    return state.storeNum == payload.num;
+  }
+}
+
+// App.vue
+this.$store.commit('modifyState', {
+  str: 'passed from payload',
+  num: 20,
+})
+------------------------------------------------------
+
+
+[ state 는 왜 직접 변경하지 않고, mutations로 변경할까? ]
+- 여러 개의 컴포넌트에서 아래와 같이 state 값을 변경하는 경우,
+  어느 컴포넌트에서 해당 state를 변경했는지 추척하기가 어렵다.
+  methods: {
+    increaseCounter() {
+      this.$store.state.counter++;
+    }
+  }
+- 특정 시점에 어떤 컴포넌트가 state 를 접근하여 변경한 건지 확인하기 어렵다.
+- 따라서, vue의 반응성을 거스르지 않게 명시적으로 상태 변화를 수행. 반응성, 디버깅, 테스트 헤택
+
+
+[ actions 란? ]
+- actions: 비동기 처리 로직을 선언하는 메서드,
+- mutations: 비동기 로직을 담당
+- 데이터 요청, Promise, ES6 async 과 같은 비동기 처리를 모두 actions 에 선언
+------------------------------------------------------
+// store.js
+state: {
+  num: 10
+},
+mutations: {
+  doubleNumber(state) {
+    state.num * 2;
+  }
+},
+actions: {
+  delayDoubleNumber(context) {  // context로 store 의 메서드와 속성 접근
+    context.commit('doubleNumber);
+  }
+}
+
+// App.vue
+this.$store.dispatch('delayDoubleNumber');
+------------------------------------------------------
+
+actions 비동기 코드 예제 1
+------------------------------------------------------
+// store.js
+mutations: {
+  addCounter(state) {
+    state.counter++;
+  }
+},
+actions: {
+  delayAddCounter(context) {
+    setTimeout(() => context.commit('addCounter'), 2000);
+  }
+}
+
+// App.vue
+methods: {
+  increamentCounter() {
+    this.$store.dispatch('delayAddCounter');
+  }
+}
+------------------------------------------------------
+
+actions 비동기 코드 예제 2
+------------------------------------------------------
+// store.js
+mutations: {
+  setData(state, fetchedData) {
+    state.product = fetchData;
+  }
+},
+actions: {
+  fetchProductData(context) {
+    return axios.get('https://domain.com/products/1')
+              .then(response => context.commit('setData', response))
+  }
+}
+
+// App.vue
+methods: {
+  getProduct() {
+    this.$store.dispatch('fetchProductData');
+  }
+}
+------------------------------------------------------
+
+
+[왜 비동기 처리 로직은 actions 에 선언해야 할까? ]
+- 언제 어느 컴포넌트에서 해당 state 를 호출하고,변경했는지 확인하기가 어려움.
+- state 값의 변화를 추척하기 어렵기 때문에, mutations 속성에는 동기 처리 로직만 넣어야 한다.
+
+
+[ Helper : 각 속성들을 더 쉽세 사용하는 방법 ]
+- store 에 있는 아래 4가지 속성들을 간편한게 코딩하는 방법
+
+  * state : mapState
+  * getters : mapGetters
+  * mutations : mapMutations
+  * actions : mapActions
+
+
+[ 헬퍼의 사용법 ]
+- 헬퍼를 사용하고자 하는 vue 파일(컴포넌트) 에서 아래와 같이 해당 헬퍼를 로딩
+
+------------------------------------------------------
+// App.vue
+import {  mapState, 
+          mapGetters, 
+          mapMutations, 
+          mapActions} from 'vuex'
+
+export default {
+  computed() {
+    ...mapState(['num']), ...mapGetters(['countedNum']),
+  },
+  methods: {
+    ...mapMutataions(['clickBtn']), ...mapActions(['asyncClickBtn'])
+  }
+}
+
+* ...는 오타인가?!
+  : ES6 의 Object Spread Operator 입니다.
+------------------------------------------------------
+
+
+[ mapState ]
+- Vuex에 선언한 state 속성을 vue 컴포넌트에 더 쉽게 연결해주는 헬퍼
+------------------------------------------------------
+// App.vue
+import { mapState } from 'vuex';
+
+computed() {
+  ...mapState(['num'])
+  // num() { return this.$store.state.num; }
+}
+
+//store.js
+state : {
+  num: 10
+}
+
+// HTML
+<!-- <p> {{ this.$store.state.num }} </p> -->
+<p> {{ this.num }} </p>
+------------------------------------------------------
+
+
+[ mapGetters ]
+- Vuex 에 선언한 getters 속성을 vue 컴포넌트에 더 쉽게 연결해주는 헬퍼
+
+------------------------------------------------------
+// App.vue
+import { mapState } from 'vuex';
+
+computed() {
+  ...mapGetters(['reverseMessage']);
+}
+
+// store.js
+getters: {
+  reverseMessage(state) {
+    return state.msg.split('').reverse().join('');
+  }
+}
+
+// HTML
+<!-- <p> {{ this.$store.getters.reverseMessage }} </p> -->
+<p> {{ this.reverseMessage }} </p>
+------------------------------------------------------
+
+[ mapMutations ]
+- Vuex 에 선언한 mutations 속성을 vue 컴포넌트에 더 쉽게 연결해주는 헬퍼
+------------------------------------------------------
+// App.vue
+import { mapMutations } from 'vuex'
+
+methods: {
+  ...mapMutations(['clickBtn']),
+  authLogin() {},
+  displayTable() {},
+}
+
+// store.js
+mutations: {
+  clickBtn(state) {
+    alert(state.msg);
+  }
+}
+
+// HTML
+<button @click='clickBtn'> popup message </button>
+------------------------------------------------------
+
+[ maActions ]
+- VUex 에 선언한 actions 속성을 vue 컴포넌트에 더 쉽게 연결해주는 헬퍼
+------------------------------------------------------
+// App.vue
+import { mapActions } from 'vuex'
+
+methods: {
+  ...mapActions(['delayClickBtn]),
+}
+
+// store.js
+actions: {
+  delayClickBtn(context) {
+    setTimeout(() => context.commit('clickBtn'), 2000);
+  }
+}
+
+// HTML
+<button @click='delayClickBtn'>delay popup message </button>
+------------------------------------------------------
+
+[ 헬퍼의 유연한 문법 ]
+- Vuex 에 선언한 속성을 그대로 컴포넌트에 연결하는 문법
+------------------------------------------------------
+// 배열 리터럴
+...mapMutations([
+  'clickBtn', // 'clickBtn': clickBtn
+  'addNumber', // addNumber(인자)
+])
+------------------------------------------------------
+
+- Vuex 에 선언한 속성을 컴포넌트의 특정 메서드에서다가 연결하는 문법
+------------------------------------------------------
+// 객체 리터럴
+...mapMutations({
+  popupMsg: 'clickBtn'  // 컴포넌트 메서드 명: store 의 mutations 명
+})
+------------------------------------------------------
+
+
+
+[ 프로젝트 구조화와 모듈화 방법 1 ]
+ - 아래와 같은 store 구조를 어떻게 모듈화 할 수 있을까?
+------------------------------------------------------
+// store.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+export const store = new Vuex.Store({
+  state: {},
+  getters: {},
+  mutations: {},
+  actions: {},
+});
+------------------------------------------------------
+** 힌트: Vuex.Store({}) 의 속성을 모듈로 연결
+
+
+- ES6 의 import & export 를 이용하여 속성별로 모듈화
+------------------------------------------------------
+// store.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+import * as getters from 'store/getters.js'
+import * as mutations from 'store/mutations.js'
+import * as actions from 'store/actions.js'
+
+export const store = new Vuex.Store({
+  state: {},
+  getters: getters,
+  mutations: mutations,
+  actions: actions,
+});
+------------------------------------------------------
+
+
+[ 프로젝트 구조화와 모듈화 방법 2 ]
+- 앱이 비대해져서 1개의 store 로는 관리가 힘들 때 modules 속성 사용
+------------------------------------------------------
+// store.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+import todo from 'modules/todo.js'
+
+export const store = new Vuex.Store({
+  modules: {
+    moduleA : todo,   // 모듈 명칭 : 모듈 파일명
+    todo,   // todo:todo
+  }
+})
+
+// todo.js
+const state = {}
+const getters = {}
+const mutations = {}
+const actions = {}
+------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
