@@ -4,8 +4,6 @@ import { store } from '@/store/store';
 
 Vue.config.productionTip = false;
 
-console.log('test');
-
 new Vue({
   render: h => h(App),
   store,
