@@ -13,6 +13,7 @@ export const store = new Vuex.Store({
     asks: [],
     userInfo: {},
     item: {},
+    list: [],
   },
   getters: {
     // computed 와 같은 속성

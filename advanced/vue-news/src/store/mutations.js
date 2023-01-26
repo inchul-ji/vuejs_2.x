@@ -8,6 +8,9 @@ export default {
   SET_ASKS(state, asks) {
     state.asks = asks;
   },
+  SET_LIST(state, list) {
+    state.list = list;
+  },
   SET_USERINFO(state, userInfo) {
     state.userInfo = userInfo;
   },

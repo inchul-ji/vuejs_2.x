@@ -18,6 +18,10 @@ export const fetchJobsList = () => {
   return axios.get(`${config.baseUrl}/jobs/1.json`);
 };
 
+export const fetchList = pageName => {
+  return axios.get(`${config.baseUrl}/${pageName}/1.json`);
+};
+
 export const fetchUserInfo = username => {
   return axios.get(`${config.baseUrl}/user/${username}.json`);
 };

@@ -9,10 +9,11 @@
 <script>
 export default {
   props: {
-    loading: {
-      type: Boolean,
-      required: true,
-    },
+    loading: Boolean,
+    // loading: {
+    //   type: Boolean,
+    //   required: true,
+    // },
   },
 };
 </script>

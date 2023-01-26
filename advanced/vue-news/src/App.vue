@@ -4,7 +4,7 @@
     <transition name="page">
       <router-view></router-view>
     </transition>
-    <spinner :loading="loadingStatus"></spinner>
+    <Spinner :loading="loadingStatus"></Spinner>
   </div>
 </template>
 
@@ -26,9 +26,11 @@ export default {
   },
   method: {
     startSpinner() {
+      console.log('startSpinner', this.loadingStatus);
       this.loadingStatus = true;
     },
     endSpinner() {
+      console.log('endSpinner', this.loadingStatus);
       this.loadingStatus = false;
     },
   },
@@ -45,7 +47,6 @@ export default {
 
 <style>
 body {
-  padding: 0;
   margin: 0;
 }
 
@@ -62,11 +63,11 @@ a.router-link-active {
 }
 
 /* Router Transition */
-.page-enter-active,
-.page-leave-active {
+.routing-fade-enter-active,
+.routing-fade-leave-active {
   transition: opacity 0.3s ease;
 }
-.page-enter, .page-leave-to
+.routing-fade-enter, .routing-fade-leave-to
 /* .routing-fade-leave-active below version 2.1.8 */ {
   opacity: 0;
 }
